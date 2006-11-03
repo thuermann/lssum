@@ -1,8 +1,9 @@
 /*
- * $Id: lssum.c,v 1.2 2006/11/03 07:16:04 urs Exp $
+ * $Id: lssum.c,v 1.3 2006/11/03 07:16:14 urs Exp $
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -14,11 +15,49 @@
 
 static void lssum(char *fname);
 
+static int opt_mtime   = 0;
+static int opt_ctime   = 0;
+static int opt_user    = 0;
+static int opt_group   = 0;
+static int opt_verbose = 0;
+
+static void usage(char *name)
+{
+    fprintf(stderr, "Usage: %s [-m] [-c] [-u] [-g] [-v] files...\n", name);
+    exit(1);
+}
+
 int main(int argc, char **argv)
 {
-    int i;
+    int errflg = 0;
+    int opt, i;
 
-    for (i = 1; i < argc; i++)
+    while ((opt = getopt(argc, argv, "mcugv")) != -1) {
+	switch (opt) {
+	case 'm':
+	    opt_mtime = 1;
+	    break;
+	case 'c':
+	    opt_ctime = 1;
+	    break;
+	case 'u':
+	    opt_user = 1;
+	    break;
+	case 'g':
+	    opt_group = 1;
+	    break;
+	case 'v':
+	    opt_verbose = 1;
+	    break;
+	default:
+	    errflg = 1;
+	    break;
+	}
+    }
+    if (errflg)
+	usage(argv[0]);
+
+    for (i = optind; i < argc; i++)
 	lssum(argv[i]);
 
     return 0;
@@ -31,7 +70,7 @@ static void lssum(char *fname)
     struct stat st;
     void *addr;
     int i;
-    char ts[sizeof("YYYY-MM-DD HH:MM:SS +0000")];
+    char ts[sizeof("YYYY-MM-DD HH:MM:SS +0000 YYYY-MM-DD HH:MM:SS +0000")];
     struct tm *tm;
 
     if ((fd = open(fname, O_RDONLY)) < 0) {
@@ -44,6 +83,10 @@ static void lssum(char *fname)
     }
     tm = localtime(&st.st_mtime);
     strftime(ts, sizeof(ts), "%F %T %z", tm);
+    if (opt_ctime) {
+	tm = localtime(&st.st_ctime);
+	strftime(ts + 25, sizeof(ts) - 25, " %F %T %z", tm);
+    }
     if (S_ISDIR(st.st_mode)) {
 	printf("%-44s  %s  %s\n", "dir", ts, fname);
 	return;
