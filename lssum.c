@@ -1,5 +1,5 @@
 /*
- * $Id: lssum.c,v 1.1 2006/03/03 21:09:32 urs Exp $
+ * $Id: lssum.c,v 1.2 2006/11/03 07:16:04 urs Exp $
  */
 
 #include <stdio.h>
@@ -12,7 +12,7 @@
 
 #include <openssl/md5.h>
 
-void lssum(char *fname);
+static void lssum(char *fname);
 
 int main(int argc, char **argv)
 {
@@ -24,7 +24,7 @@ int main(int argc, char **argv)
     return 0;
 }
 
-void lssum(char *fname)
+static void lssum(char *fname)
 {
     unsigned char *h;
     int fd;
