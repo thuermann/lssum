@@ -1,5 +1,5 @@
 /*
- * $Id: lssum.c,v 1.4 2007/12/20 13:11:35 urs Exp $
+ * $Id: lssum.c,v 1.5 2007/12/20 13:11:45 urs Exp $
  */
 
 #include <stdio.h>
@@ -91,15 +91,32 @@ static void lssum(char *fname)
 	printf("%-44s  %s  %s\n", "dir", ts, fname);
 	return;
     }
+#ifndef NOMMAP
     if ((addr = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, fd, 0)) < 0) {
 	perror("mmap");
 	return;
     }
 
     h = MD5(addr, st.st_size, NULL);
+    munmap(addr, st.st_size);
+#else
+    {
+    static unsigned char buffer[4 * 1048576];
+    unsigned char md[16];
+    MD5_CTX c;
+    int nbytes;
+
+    h = md;
+    MD5_Init(&c);
+    while ((nbytes = read(fd, buffer, sizeof(buffer))) > 0)
+	MD5_Update(&c, buffer, nbytes);
+    if (nbytes < 0)
+	perror(fname);
+    MD5_Final(h, &c);
+    }
+#endif
     for (i = 0; i < 16; i++)
 	printf("%02x", h[i]);
     printf("  %10lld  %s  %s\n", (long long)st.st_size, ts, fname);
     close(fd);
-    munmap(addr, st.st_size);
 }
