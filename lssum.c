@@ -1,5 +1,5 @@
 /*
- * $Id: lssum.c,v 1.3 2006/11/03 07:16:14 urs Exp $
+ * $Id: lssum.c,v 1.4 2007/12/20 13:11:35 urs Exp $
  */
 
 #include <stdio.h>
@@ -99,7 +99,7 @@ static void lssum(char *fname)
     h = MD5(addr, st.st_size, NULL);
     for (i = 0; i < 16; i++)
 	printf("%02x", h[i]);
-    printf("  %10d  %s  %s\n", st.st_size, ts, fname);
+    printf("  %10lld  %s  %s\n", (long long)st.st_size, ts, fname);
     close(fd);
     munmap(addr, st.st_size);
 }
