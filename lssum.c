@@ -1,5 +1,5 @@
 /*
- * $Id: lssum.c,v 1.5 2007/12/20 13:11:45 urs Exp $
+ * $Id: lssum.c,v 1.6 2008/01/18 17:52:08 urs Exp $
  */
 
 #include <stdio.h>
@@ -92,7 +92,8 @@ static void lssum(char *fname)
 	return;
     }
 #ifndef NOMMAP
-    if ((addr = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, fd, 0)) < 0) {
+    addr = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
+    if (addr == MAP_FAILED) {
 	perror("mmap");
 	return;
     }
