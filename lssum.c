@@ -1,11 +1,12 @@
 /*
- * $Id: lssum.c,v 1.6 2008/01/18 17:52:08 urs Exp $
+ * $Id: lssum.c,v 1.7 2008/01/18 19:30:02 urs Exp $
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
+#include <limits.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -73,11 +74,7 @@ static void lssum(char *fname)
     char ts[sizeof("YYYY-MM-DD HH:MM:SS +0000 YYYY-MM-DD HH:MM:SS +0000")];
     struct tm *tm;
 
-    if ((fd = open(fname, O_RDONLY)) < 0) {
-	perror(fname);
-	return;
-    }
-    if (fstat(fd, &st) < 0) {
+    if (lstat(fname, &st) < 0) {
 	perror("stat");
 	return;
     }
@@ -89,6 +86,16 @@ static void lssum(char *fname)
     }
     if (S_ISDIR(st.st_mode)) {
 	printf("%-44s  %s  %s\n", "dir", ts, fname);
+	return;
+    } else if (S_ISLNK(st.st_mode)) {
+	char sym[PATH_MAX];
+	int  len = readlink(fname, sym, PATH_MAX - 1);
+	sym[len] = 0;
+	printf("%-44s  %s  %s -> %s\n", "sym", ts, fname, sym);
+	return;
+    }
+    if ((fd = open(fname, O_RDONLY)) < 0) {
+	perror(fname);
 	return;
     }
 #ifndef NOMMAP
