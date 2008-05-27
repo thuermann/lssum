@@ -1,5 +1,5 @@
 /*
- * $Id: lssum.c,v 1.9 2008/05/27 13:31:02 urs Exp $
+ * $Id: lssum.c,v 1.10 2008/05/27 13:31:12 urs Exp $
  */
 
 #include <stdio.h>
@@ -12,6 +12,8 @@
 #include <sys/types.h>
 
 #include <openssl/md5.h>
+
+#define BUFSIZE (4 * 1048576)
 
 static void lssum(char *fname);
 static unsigned char *md5(char *fname);
@@ -66,11 +68,11 @@ int main(int argc, char **argv)
 
 static void lssum(char *fname)
 {
-    unsigned char *h;
     struct stat st;
-    int i;
     char ts[sizeof("YYYY-MM-DD HH:MM:SS +0000 YYYY-MM-DD HH:MM:SS +0000")];
     struct tm *tm;
+    unsigned char *hash;
+    int i;
 
     if (lstat(fname, &st) < 0) {
 	perror("stat");
@@ -93,19 +95,19 @@ static void lssum(char *fname)
 	return;
     }
 
-    if (!(h = md5(fname)))
+    if (!(hash = md5(fname)))
 	return;
 
     for (i = 0; i < 16; i++)
-	printf("%02x", h[i]);
+	printf("%02x", hash[i]);
     printf("  %10lld  %s  %s\n", (long long)st.st_size, ts, fname);
 }
 
 static unsigned char *md5(char *fname)
 {
-    static unsigned char buffer[4 * 1048576];
-    static unsigned char md[16];
-    MD5_CTX c;
+    static unsigned char buffer[BUFSIZE];
+    static unsigned char hash[16];
+    MD5_CTX ctx;
     int fd, nbytes;
 
     if ((fd = open(fname, O_RDONLY)) < 0) {
@@ -113,14 +115,14 @@ static unsigned char *md5(char *fname)
 	return NULL;
     }
 
-    MD5_Init(&c);
+    MD5_Init(&ctx);
     while ((nbytes = read(fd, buffer, sizeof(buffer))) > 0)
-	MD5_Update(&c, buffer, nbytes);
+	MD5_Update(&ctx, buffer, nbytes);
     if (nbytes < 0)
 	perror(fname);
-    MD5_Final(md, &c);
+    MD5_Final(hash, &ctx);
 
     close(fd);
 
-    return md;
+    return hash;
 }
