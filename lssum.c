@@ -1,5 +1,5 @@
 /*
- * $Id: lssum.c,v 1.10 2008/05/27 13:31:12 urs Exp $
+ * $Id: lssum.c,v 1.11 2008/05/27 13:31:22 urs Exp $
  */
 
 #include <stdio.h>
@@ -13,7 +13,7 @@
 
 #include <openssl/md5.h>
 
-#define BUFSIZE (4 * 1048576)
+#define BUFSIZE 65536
 
 static void lssum(char *fname);
 static unsigned char *md5(char *fname);
@@ -105,8 +105,8 @@ static void lssum(char *fname)
 
 static unsigned char *md5(char *fname)
 {
-    static unsigned char buffer[BUFSIZE];
     static unsigned char hash[16];
+    unsigned char buffer[BUFSIZE];
     MD5_CTX ctx;
     int fd, nbytes;
 
