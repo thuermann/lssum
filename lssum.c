@@ -1,5 +1,5 @@
 /*
- * $Id: lssum.c,v 1.7 2008/01/18 19:30:02 urs Exp $
+ * $Id: lssum.c,v 1.8 2008/05/27 13:30:52 urs Exp $
  */
 
 #include <stdio.h>
@@ -10,7 +10,6 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/mman.h>
 
 #include <openssl/md5.h>
 
@@ -69,7 +68,6 @@ static void lssum(char *fname)
     unsigned char *h;
     int fd;
     struct stat st;
-    void *addr;
     int i;
     char ts[sizeof("YYYY-MM-DD HH:MM:SS +0000 YYYY-MM-DD HH:MM:SS +0000")];
     struct tm *tm;
@@ -98,16 +96,6 @@ static void lssum(char *fname)
 	perror(fname);
 	return;
     }
-#ifndef NOMMAP
-    addr = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
-    if (addr == MAP_FAILED) {
-	perror("mmap");
-	return;
-    }
-
-    h = MD5(addr, st.st_size, NULL);
-    munmap(addr, st.st_size);
-#else
     {
     static unsigned char buffer[4 * 1048576];
     unsigned char md[16];
@@ -122,7 +110,6 @@ static void lssum(char *fname)
 	perror(fname);
     MD5_Final(h, &c);
     }
-#endif
     for (i = 0; i < 16; i++)
 	printf("%02x", h[i]);
     printf("  %10lld  %s  %s\n", (long long)st.st_size, ts, fname);
