@@ -1,5 +1,5 @@
 /*
- * $Id: lssum.c,v 1.12 2008/08/22 00:08:01 urs Exp $
+ * $Id: lssum.c,v 1.13 2008/08/22 00:08:11 urs Exp $
  */
 
 #include <stdio.h>
@@ -90,6 +90,10 @@ static void lssum(char *fname)
     } else if (S_ISLNK(st.st_mode)) {
 	char sym[PATH_MAX];
 	int  len = readlink(fname, sym, PATH_MAX - 1);
+	if (len < 0) {
+	    perror(fname);
+	    return;
+	}
 	sym[len] = 0;
 	printf("%-44s  %s  %s -> %s\n", "sym", ts, fname, sym);
 	return;
