@@ -1,5 +1,5 @@
 /*
- * $Id: lssum.c,v 1.11 2008/05/27 13:31:22 urs Exp $
+ * $Id: lssum.c,v 1.12 2008/08/22 00:08:01 urs Exp $
  */
 
 #include <stdio.h>
@@ -75,7 +75,7 @@ static void lssum(char *fname)
     int i;
 
     if (lstat(fname, &st) < 0) {
-	perror("stat");
+	perror(fname);
 	return;
     }
     tm = localtime(&st.st_mtime);
@@ -98,14 +98,14 @@ static void lssum(char *fname)
     if (!(hash = md5(fname)))
 	return;
 
-    for (i = 0; i < 16; i++)
+    for (i = 0; i < MD5_DIGEST_LENGTH; i++)
 	printf("%02x", hash[i]);
     printf("  %10lld  %s  %s\n", (long long)st.st_size, ts, fname);
 }
 
 static unsigned char *md5(char *fname)
 {
-    static unsigned char hash[16];
+    static unsigned char hash[MD5_DIGEST_LENGTH];
     unsigned char buffer[BUFSIZE];
     MD5_CTX ctx;
     int fd, nbytes;
