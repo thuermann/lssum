@@ -1,5 +1,5 @@
 /*
- * $Id: lssum.c,v 1.13 2008/08/22 00:08:11 urs Exp $
+ * $Id: lssum.c,v 1.14 2011/03/20 21:38:35 urs Exp $
  */
 
 #include <stdio.h>
@@ -15,8 +15,8 @@
 
 #define BUFSIZE 65536
 
-static void lssum(char *fname);
-static unsigned char *md5(char *fname);
+static void lssum(const char *fname);
+static unsigned char *md5(const char *fname);
 
 static int opt_mtime   = 0;
 static int opt_ctime   = 0;
@@ -24,7 +24,7 @@ static int opt_user    = 0;
 static int opt_group   = 0;
 static int opt_verbose = 0;
 
-static void usage(char *name)
+static void usage(const char *name)
 {
     fprintf(stderr, "Usage: %s [-m] [-c] [-u] [-g] [-v] files...\n", name);
     exit(1);
@@ -66,7 +66,7 @@ int main(int argc, char **argv)
     return 0;
 }
 
-static void lssum(char *fname)
+static void lssum(const char *fname)
 {
     struct stat st;
     char ts[sizeof("YYYY-MM-DD HH:MM:SS +0000 YYYY-MM-DD HH:MM:SS +0000")];
@@ -107,7 +107,7 @@ static void lssum(char *fname)
     printf("  %10lld  %s  %s\n", (long long)st.st_size, ts, fname);
 }
 
-static unsigned char *md5(char *fname)
+static unsigned char *md5(const char *fname)
 {
     static unsigned char hash[MD5_DIGEST_LENGTH];
     unsigned char buffer[BUFSIZE];
