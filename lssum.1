@@ -1,0 +1,22 @@
+.\"
+.\" $Id: lssum.1,v 1.1 2011/05/22 06:14:59 urs Exp $
+.\"
+.TH LSSUM 1 "Mar 24, 2011" "" "User Commands"
+.SH NAME
+lssum \- list files with their MD5 hash
+.SH SYNOPSIS
+.B lssum
+.RB [ \-c ]
+.IR file " ..."
+.SH DESCRIPTION
+.B lssum
+lists the named files along with their size, modification time, and
+MD5 hash.
+.SH OPTIONS
+.TP
+.B \-c
+Show last status change time in addition to modification time.
+.SH "SEE ALSO"
+.BR ls "(1), " md5sum (1)
+.SH AUTHOR
+Urs Thuermann <urs@isnogud.escape.de>

@@ -1,0 +1,13 @@
+This is a simple tool that lists files (regular, dir, symlink) along
+with some of their meta-data like size and time stamps, and a hash
+value (MD5) of the file contents.  This can be very useful when
+
+- you want to compare files or directories with sub-directories and want
+  to see diffs not only in content but also in time stamps.
+
+- you want to compare files on different machines where files are not
+  mounted in one machine, where the two machines might not even have
+  a network connection to each other.
+
+To use, run lssum on two ore more sets of files and compare the lssum
+output.
