@@ -1,10 +1,11 @@
 /*
- * $Id: lssum.c,v 1.15 2012/04/04 17:55:52 urs Exp $
+ * $Id: lssum.c,v 1.16 2012/04/04 17:56:26 urs Exp $
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <locale.h>
 #include <unistd.h>
 #include <limits.h>
 #include <fcntl.h>
@@ -34,6 +35,8 @@ int main(int argc, char **argv)
 {
     int errflg = 0;
     int opt, i;
+
+    setlocale(LC_ALL, "");
 
     while ((opt = getopt(argc, argv, "mcugv")) != -1) {
 	switch (opt) {
