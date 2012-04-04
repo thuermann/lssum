@@ -1,5 +1,5 @@
 /*
- * $Id: lssum.c,v 1.14 2011/03/20 21:38:35 urs Exp $
+ * $Id: lssum.c,v 1.15 2012/04/04 17:55:52 urs Exp $
  */
 
 #include <stdio.h>
@@ -26,7 +26,7 @@ static int opt_verbose = 0;
 
 static void usage(const char *name)
 {
-    fprintf(stderr, "Usage: %s [-m] [-c] [-u] [-g] [-v] files...\n", name);
+    fprintf(stderr, "Usage: %s [-mcugv] files...\n", name);
     exit(1);
 }
 
