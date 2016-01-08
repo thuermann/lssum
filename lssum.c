@@ -1,5 +1,5 @@
 /*
- * $Id: lssum.c,v 1.17 2015/02/22 22:40:37 urs Exp $
+ * $Id: lssum.c,v 1.18 2016/01/08 13:09:26 urs Exp $
  */
 
 #include <stdio.h>
@@ -72,8 +72,11 @@ int main(int argc, char **argv)
 
 static int lssum(const char *fname)
 {
+#define TIMEFMT  "%F %T %z"
+#define TIMESIZE (sizeof("YYYY-MM-DD HH:MM:SS +0000") - 1)
+
     struct stat st;
-    char ts[sizeof("YYYY-MM-DD HH:MM:SS +0000 YYYY-MM-DD HH:MM:SS +0000")];
+    char ts[2 * TIMESIZE + 1 + 1];
     struct tm *tm;
     unsigned char *hash;
     int i;
@@ -83,10 +86,10 @@ static int lssum(const char *fname)
 	return 1;
     }
     tm = localtime(&st.st_mtime);
-    strftime(ts, sizeof(ts), "%F %T %z", tm);
+    strftime(ts, sizeof(ts), TIMEFMT, tm);
     if (opt_ctime) {
 	tm = localtime(&st.st_ctime);
-	strftime(ts + 25, sizeof(ts) - 25, " %F %T %z", tm);
+	strftime(ts + TIMESIZE, sizeof(ts) - TIMESIZE, " " TIMEFMT, tm);
     }
     if (S_ISDIR(st.st_mode)) {
 	printf("%-44s  %s  %s\n", "dir", ts, fname);
