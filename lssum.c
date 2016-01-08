@@ -1,5 +1,5 @@
 /*
- * $Id: lssum.c,v 1.18 2016/01/08 13:09:26 urs Exp $
+ * $Id: lssum.c,v 1.19 2016/01/08 13:10:26 urs Exp $
  */
 
 #include <stdio.h>
@@ -18,6 +18,7 @@
 
 static int lssum(const char *fname);
 static unsigned char *md5(const char *fname);
+static char *hex(char *t, unsigned char *s, size_t len);
 
 static int opt_mtime   = 0;
 static int opt_ctime   = 0;
@@ -77,9 +78,9 @@ static int lssum(const char *fname)
 
     struct stat st;
     char ts[2 * TIMESIZE + 1 + 1];
+    char hashstr[2 * MD5_DIGEST_LENGTH + 1];
     struct tm *tm;
     unsigned char *hash;
-    int i;
 
     if (lstat(fname, &st) < 0) {
 	perror(fname);
@@ -109,9 +110,8 @@ static int lssum(const char *fname)
     if (!(hash = md5(fname)))
 	return 1;
 
-    for (i = 0; i < MD5_DIGEST_LENGTH; i++)
-	printf("%02x", hash[i]);
-    printf("  %10lld  %s  %s\n", (long long)st.st_size, ts, fname);
+    hex(hashstr, hash, MD5_DIGEST_LENGTH);
+    printf("%s  %10lld  %s  %s\n", hashstr, (long long)st.st_size, ts, fname);
 
     return 0;
 }
@@ -140,4 +140,14 @@ static unsigned char *md5(const char *fname)
     close(fd);
 
     return hash;
+}
+
+static char *hex(char *t, unsigned char *s, size_t len)
+{
+    size_t i;
+
+    for (i = 0; i < len; i++)
+	sprintf(t + 2 * i, "%02x", s[i]);
+
+    return t;
 }
