@@ -1,5 +1,5 @@
 /*
- * $Id: lssum.c,v 1.19 2016/01/08 13:10:26 urs Exp $
+ * $Id: lssum.c,v 1.20 2016/01/08 13:10:49 urs Exp $
  */
 
 #include <stdio.h>
@@ -78,9 +78,7 @@ static int lssum(const char *fname)
 
     struct stat st;
     char ts[2 * TIMESIZE + 1 + 1];
-    char hashstr[2 * MD5_DIGEST_LENGTH + 1];
     struct tm *tm;
-    unsigned char *hash;
 
     if (lstat(fname, &st) < 0) {
 	perror(fname);
@@ -94,7 +92,6 @@ static int lssum(const char *fname)
     }
     if (S_ISDIR(st.st_mode)) {
 	printf("%-44s  %s  %s\n", "dir", ts, fname);
-	return 0;
     } else if (S_ISLNK(st.st_mode)) {
 	char sym[PATH_MAX];
 	int  len = readlink(fname, sym, PATH_MAX - 1);
@@ -104,15 +101,17 @@ static int lssum(const char *fname)
 	}
 	sym[len] = 0;
 	printf("%-44s  %s  %s -> %s\n", "sym", ts, fname, sym);
-	return 0;
+    } else {
+	char hashstr[2 * MD5_DIGEST_LENGTH + 1];
+	unsigned char *hash;
+	long long size = st.st_size;
+
+	if (!(hash = md5(fname)))
+	    return 1;
+
+	hex(hashstr, hash, MD5_DIGEST_LENGTH);
+	printf("%s  %10lld  %s  %s\n", hashstr, size, ts, fname);
     }
-
-    if (!(hash = md5(fname)))
-	return 1;
-
-    hex(hashstr, hash, MD5_DIGEST_LENGTH);
-    printf("%s  %10lld  %s  %s\n", hashstr, (long long)st.st_size, ts, fname);
-
     return 0;
 }
 
