@@ -1,5 +1,5 @@
 /*
- * $Id: lssum.c,v 1.23 2018/10/25 05:33:31 urs Exp $
+ * $Id: lssum.c,v 1.24 2018/10/25 05:33:48 urs Exp $
  */
 
 #include <stdio.h>
@@ -101,26 +101,7 @@ static int lssum(const char *fname)
 	else
 	    sprintf(id + id_cnt, "%8d ", st.st_gid);
     }
-    if (S_ISDIR(st.st_mode)) {
-	printf("%-44s  %s%s  %s\n", "dir", id, ts, fname);
-    } else if (S_ISBLK(st.st_mode)) {
-	printf("%-44s  %s%s  %s\n", "blk", id, ts, fname);
-    } else if (S_ISCHR(st.st_mode)) {
-	printf("%-44s  %s%s  %s\n", "chr", id, ts, fname);
-    } else if (S_ISFIFO(st.st_mode)) {
-	printf("%-44s  %s%s  %s\n", "fifo", id, ts, fname);
-    } else if (S_ISSOCK(st.st_mode)) {
-	printf("%-44s  %s%s  %s\n", "sock", id, ts, fname);
-    } else if (S_ISLNK(st.st_mode)) {
-	char sym[PATH_MAX];
-	int  len = readlink(fname, sym, PATH_MAX - 1);
-	if (len < 0) {
-	    perror(fname);
-	    return 1;
-	}
-	sym[len] = 0;
-	printf("%-44s  %s%s  %s -> %s\n", "sym", id, ts, fname, sym);
-    } else if (S_ISREG(st.st_mode)) {
+    if (S_ISREG(st.st_mode)) {
 	char hashstr[2 * MD5_DIGEST_LENGTH + 1];
 	unsigned char *hash;
 	long long size = st.st_size;
@@ -130,6 +111,25 @@ static int lssum(const char *fname)
 
 	hex(hashstr, hash, MD5_DIGEST_LENGTH);
 	printf("%s  %10lld  %s%s  %s\n", hashstr, size, id, ts, fname);
+    } else if (S_ISLNK(st.st_mode)) {
+	char sym[PATH_MAX];
+	int  len = readlink(fname, sym, PATH_MAX - 1);
+	if (len < 0) {
+	    perror(fname);
+	    return 1;
+	}
+	sym[len] = 0;
+	printf("%-44s  %s%s  %s -> %s\n", "sym", id, ts, fname, sym);
+    } else if (S_ISDIR(st.st_mode)) {
+	printf("%-44s  %s%s  %s\n", "dir", id, ts, fname);
+    } else if (S_ISBLK(st.st_mode)) {
+	printf("%-44s  %s%s  %s\n", "blk", id, ts, fname);
+    } else if (S_ISCHR(st.st_mode)) {
+	printf("%-44s  %s%s  %s\n", "chr", id, ts, fname);
+    } else if (S_ISFIFO(st.st_mode)) {
+	printf("%-44s  %s%s  %s\n", "fifo", id, ts, fname);
+    } else if (S_ISSOCK(st.st_mode)) {
+	printf("%-44s  %s%s  %s\n", "sock", id, ts, fname);
     } else {
 	printf("%-44s  %s%s  %s\n", "?", id, ts, fname);
     }
