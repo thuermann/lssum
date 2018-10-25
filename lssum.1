@@ -1,7 +1,7 @@
 .\"
-.\" $Id: lssum.1,v 1.1 2011/05/22 06:14:59 urs Exp $
+.\" $Id: lssum.1,v 1.2 2018/10/25 05:33:18 urs Exp $
 .\"
-.TH LSSUM 1 "Mar 24, 2011" "" "User Commands"
+.TH LSSUM 1 "Oct 25, 2018" "" "User Commands"
 .SH NAME
 lssum \- list files with their MD5 hash
 .SH SYNOPSIS
@@ -16,6 +16,12 @@ MD5 hash.
 .TP
 .B \-c
 Show last status change time in addition to modification time.
+.TP
+.B \-u
+Add user name to output.
+.TP
+.B \-g
+Add group name to output.
 .SH "SEE ALSO"
 .BR ls "(1), " md5sum (1)
 .SH AUTHOR

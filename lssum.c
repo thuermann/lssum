@@ -1,5 +1,5 @@
 /*
- * $Id: lssum.c,v 1.21 2018/10/25 05:33:05 urs Exp $
+ * $Id: lssum.c,v 1.22 2018/10/25 05:33:18 urs Exp $
  */
 
 #include <stdio.h>
@@ -9,6 +9,8 @@
 #include <unistd.h>
 #include <limits.h>
 #include <fcntl.h>
+#include <pwd.h>
+#include <grp.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -20,15 +22,13 @@ static int lssum(const char *fname);
 static unsigned char *md5(const char *fname);
 static char *hex(char *t, unsigned char *s, size_t len);
 
-static int opt_mtime   = 0;
 static int opt_ctime   = 0;
 static int opt_user    = 0;
 static int opt_group   = 0;
-static int opt_verbose = 0;
 
 static void usage(const char *name)
 {
-    fprintf(stderr, "Usage: %s [-mcugv] files...\n", name);
+    fprintf(stderr, "Usage: %s [-cug] files...\n", name);
 }
 
 int main(int argc, char **argv)
@@ -38,11 +38,8 @@ int main(int argc, char **argv)
 
     setlocale(LC_ALL, "");
 
-    while ((opt = getopt(argc, argv, "mcugv")) != -1) {
+    while ((opt = getopt(argc, argv, "cug")) != -1) {
 	switch (opt) {
-	case 'm':
-	    opt_mtime = 1;
-	    break;
 	case 'c':
 	    opt_ctime = 1;
 	    break;
@@ -51,9 +48,6 @@ int main(int argc, char **argv)
 	    break;
 	case 'g':
 	    opt_group = 1;
-	    break;
-	case 'v':
-	    opt_verbose = 1;
 	    break;
 	default:
 	    errflg = 1;
@@ -79,6 +73,8 @@ static int lssum(const char *fname)
 
     struct stat st;
     char ts[2 * TIMESIZE + 1 + 1];
+    char id[2 * LOGIN_NAME_MAX + 1 + 1] = "";
+    int id_cnt = 0;
     struct tm *tm;
 
     if (lstat(fname, &st) < 0) {
@@ -91,8 +87,22 @@ static int lssum(const char *fname)
 	tm = localtime(&st.st_ctime);
 	strftime(ts + TIMESIZE, sizeof(ts) - TIMESIZE, " " TIMEFMT, tm);
     }
+    if (opt_user) {
+	struct passwd *pw = getpwuid(st.st_uid);
+	if (pw)
+	    id_cnt = sprintf(id, "%-8s ", pw->pw_name);
+	else
+	    id_cnt = sprintf(id, "%8d ", st.st_uid);
+    }
+    if (opt_group) {
+	struct group *gr = getgrgid(st.st_gid);
+	if (gr)
+	    sprintf(id + id_cnt, "%-8s ", gr->gr_name);
+	else
+	    sprintf(id + id_cnt, "%8d ", st.st_gid);
+    }
     if (S_ISDIR(st.st_mode)) {
-	printf("%-44s  %s  %s\n", "dir", ts, fname);
+	printf("%-44s  %s%s  %s\n", "dir", id, ts, fname);
     } else if (S_ISLNK(st.st_mode)) {
 	char sym[PATH_MAX];
 	int  len = readlink(fname, sym, PATH_MAX - 1);
@@ -101,7 +111,7 @@ static int lssum(const char *fname)
 	    return 1;
 	}
 	sym[len] = 0;
-	printf("%-44s  %s  %s -> %s\n", "sym", ts, fname, sym);
+	printf("%-44s  %s%s  %s -> %s\n", "sym", id, ts, fname, sym);
     } else {
 	char hashstr[2 * MD5_DIGEST_LENGTH + 1];
 	unsigned char *hash;
@@ -111,7 +121,7 @@ static int lssum(const char *fname)
 	    return 1;
 
 	hex(hashstr, hash, MD5_DIGEST_LENGTH);
-	printf("%s  %10lld  %s  %s\n", hashstr, size, ts, fname);
+	printf("%s  %10lld  %s%s  %s\n", hashstr, size, id, ts, fname);
     }
     return 0;
 }
