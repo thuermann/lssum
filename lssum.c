@@ -1,5 +1,5 @@
 /*
- * $Id: lssum.c,v 1.20 2016/01/08 13:10:49 urs Exp $
+ * $Id: lssum.c,v 1.21 2018/10/25 05:33:05 urs Exp $
  */
 
 #include <stdio.h>
@@ -29,7 +29,6 @@ static int opt_verbose = 0;
 static void usage(const char *name)
 {
     fprintf(stderr, "Usage: %s [-mcugv] files...\n", name);
-    exit(1);
 }
 
 int main(int argc, char **argv)
@@ -61,8 +60,10 @@ int main(int argc, char **argv)
 	    break;
 	}
     }
-    if (errflg)
+    if (errflg) {
 	usage(argv[0]);
+	exit(1);
+    }
 
     for (i = optind; i < argc; i++)
 	if (lssum(argv[i]))
